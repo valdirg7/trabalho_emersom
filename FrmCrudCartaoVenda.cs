@@ -11,33 +11,41 @@ using System.Data.SqlClient;
 
 namespace LojaCL
 {
-    public partial class FrmCrudUsuario : Form
+    public partial class FrmCrudCartaoVenda : Form
     {
-        private Cripto b;
         SqlConnection con = Conexao.obterConexao();
-        public FrmCrudUsuario()
+        public FrmCrudCartaoVenda()
         {
             InitializeComponent();
-            b = new Cripto();
         }
 
-        public void CarregaDgvUsuario()
+        public void carrega_dgv_cartaoVenda()
         {
             SqlConnection con = Conexao.obterConexao();
-            String query = "select * from usuario";
+            String query = "select * from cartaovenda";
             SqlCommand cmd = new SqlCommand(query, con);
             Conexao.obterConexao();
             cmd.CommandType = CommandType.Text;
             SqlDataAdapter da = new SqlDataAdapter(cmd);
-            DataTable produto = new DataTable();
-            da.Fill(produto);
-            DgvUsuario.DataSource = produto;
+            DataTable cartao = new DataTable();
+            da.Fill(cartao);
+            dgv_cartaoVenda.DataSource = cartao;
             Conexao.fecharConexao();
         }
 
-        private void btnSair_Click(object sender, EventArgs e)
+        public void CarregacbxUsuario()
         {
-            this.Close();
+            string cli = "select id, nome from usuario";
+            SqlCommand cmd = new SqlCommand(cli, con);
+            Conexao.obterConexao();
+            cmd.CommandType = CommandType.Text;
+            SqlDataAdapter da = new SqlDataAdapter(cli, con);
+            DataSet ds = new DataSet();
+            da.Fill(ds, "nome");
+            cbx_usuario.ValueMember = "id";
+            cbx_usuario.DisplayMember = "nome";
+            cbx_usuario.DataSource = ds.Tables["nome"];
+            Conexao.fecharConexao();
         }
 
         private void btnCadastro_Click(object sender, EventArgs e)
@@ -46,25 +54,19 @@ namespace LojaCL
             {
                 SqlConnection con = Conexao.obterConexao();
                 SqlCommand cmd = con.CreateCommand();
-                cmd.CommandText = "InserirUsuario";
+                cmd.CommandText = "Inserir_CartaoVenda";
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@nome", txtNome.Text);
-                cmd.Parameters.AddWithValue("@login", txtLogin.Text);
-                //Pego o valor o txtSenha e codifico ela.
-                txtSenha.Text = b.Base64Encode(txtSenha.Text);
-                //Crio uma nova varialvel e atribuo o txtSenha a ela.
-                string criptografada = txtSenha.Text;
-                //Passo para o parametro gravar a senha decodificada.
-                cmd.Parameters.AddWithValue("@senha", criptografada);
+                cmd.Parameters.AddWithValue("@numero", txt_numero.Text);
+                cmd.Parameters.AddWithValue("@usuario", cbx_usuario.Text);
                 Conexao.obterConexao();
                 cmd.ExecuteNonQuery();
-                CarregaDgvUsuario();
+                carrega_dgv_cartaoVenda();
+                FrmPrincipal obj = (FrmPrincipal)Application.OpenForms["FrmPrincipal"];
+                obj.carrega_dgvPri_pedido();
                 MessageBox.Show("Registro inserido com sucesso!", "Cadastro", MessageBoxButtons.OK);
                 Conexao.fecharConexao();
-                txtId.Text = "";
-                txtNome.Text = "";
-                txtLogin.Text = "";
-                txtSenha.Text = "";
+                txt_numero.Text = "";
+                cbx_usuario.Text = "";
             }
             catch (Exception er)
             {
@@ -78,26 +80,26 @@ namespace LojaCL
             {
                 SqlConnection con = Conexao.obterConexao();
                 SqlCommand cmd = con.CreateCommand();
-                cmd.CommandText = "AtualizarUsuario";
+                cmd.CommandText = "Atualizar_CartaoVenda";
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@Id", this.txtId.Text);
-                cmd.Parameters.AddWithValue("@nome", this.txtNome.Text);
-                cmd.Parameters.AddWithValue("@login", this.txtLogin.Text);
-                cmd.Parameters.AddWithValue("@senha", this.txtSenha.Text);
+                cmd.Parameters.AddWithValue("@numero", this.txt_numero.Text);
+                cmd.Parameters.AddWithValue("@usuario", this.cbx_usuario.Text);
                 Conexao.obterConexao();
                 cmd.ExecuteNonQuery();
-                CarregaDgvUsuario();
+                carrega_dgv_cartaoVenda();
+                FrmPrincipal obj = (FrmPrincipal)Application.OpenForms["FrmPrincipal"];
+                obj.carrega_dgvPri_pedido();
                 MessageBox.Show("Registro atualizado com sucesso!", "Atualizar Registro", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 Conexao.fecharConexao();
-                txtId.Text = "";
-                txtNome.Text = "";
-                txtLogin.Text = "";
-                txtSenha.Text = "";
+                txt_numero.Text = "";
+                cbx_usuario.Text = "";
             }
             catch (Exception er)
             {
                 MessageBox.Show(er.Message);
             }
+            
         }
 
         private void btnExcluir_Click(object sender, EventArgs e)
@@ -106,23 +108,28 @@ namespace LojaCL
             {
                 SqlConnection con = Conexao.obterConexao();
                 SqlCommand cmd = con.CreateCommand();
-                cmd.CommandText = "ExcluirUsuario";
+                cmd.CommandText = "Excluir_CartaoVenda";
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@Id", this.txtId.Text);
                 Conexao.obterConexao();
                 cmd.ExecuteNonQuery();
-                CarregaDgvUsuario();
+                carrega_dgv_cartaoVenda();
+                FrmPrincipal obj = (FrmPrincipal)Application.OpenForms["FrmPrincipal"];
+                obj.carrega_dgvPri_pedido();
                 MessageBox.Show("Registro apagado com sucesso!", "Excluir Registro", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 Conexao.fecharConexao();
-                txtId.Text = "";
-                txtNome.Text = "";
-                txtLogin.Text = "";
-                txtSenha.Text = "";
+                txt_numero.Text = "";
+                cbx_usuario.Text = "";
             }
             catch (Exception er)
             {
                 MessageBox.Show(er.Message);
             }
+        }
+
+        private void btnSair_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
 
         private void btnPesquisa_Click(object sender, EventArgs e)
@@ -131,7 +138,7 @@ namespace LojaCL
             {
                 SqlConnection con = Conexao.obterConexao();
                 SqlCommand cmd = con.CreateCommand();
-                cmd.CommandText = "LocalizarUsuario";
+                cmd.CommandText = "Localizar_CartaoVenda";
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@Id", this.txtId.Text);
                 Conexao.obterConexao();
@@ -139,9 +146,8 @@ namespace LojaCL
                 if (rd.Read())
                 {
                     txtId.Text = rd["Id"].ToString();
-                    txtNome.Text = rd["nome"].ToString();
-                    txtLogin.Text = rd["login"].ToString();
-                    txtSenha.Text = rd["senha"].ToString();
+                    txt_numero.Text = rd["numero"].ToString();
+                    cbx_usuario.Text = rd["usuario"].ToString();
                     Conexao.fecharConexao();
                 }
                 else
@@ -155,21 +161,14 @@ namespace LojaCL
             }
         }
 
-        private void DgvUsuario_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void cbx_usuario_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (e.RowIndex >= 0)
-            {
-                DataGridViewRow row = this.DgvUsuario.Rows[e.RowIndex];
-                txtId.Text = row.Cells[0].Value.ToString();
-                txtNome.Text = row.Cells[1].Value.ToString();
-                txtLogin.Text = row.Cells[2].Value.ToString();
-                txtSenha.Text = row.Cells[3].Value.ToString();
-            }
+            
         }
 
-        private void FrmCrudUsuario_Load(object sender, EventArgs e)
+        private void FrmCrudCartaoVenda_Load(object sender, EventArgs e)
         {
-            CarregaDgvUsuario();
+            CarregacbxUsuario();
         }
     }
 }

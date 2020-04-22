@@ -18,6 +18,38 @@ namespace LojaCL
             InitializeComponent();
         }
 
+        public void carrega_dgvPri_pedido()
+        {
+            SqlConnection con = Conexao.obterConexao();
+            String query = "SELECT * FROM cartaovenda";
+            SqlCommand cmd = new SqlCommand(query, con);
+            Conexao.obterConexao();
+            cmd.CommandType = CommandType.Text;
+            //SQlDataAdapter, usado para preencher o DataTable
+            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            //Adicionar DataTable carregado em memória
+            DataTable cartao = new DataTable();
+            da.Fill(cartao);
+            //Fonte de dados
+            dgvPri_pedido.DataSource = cartao;
+            //Quando for criar um controle em tempo de execução, é importante atribuir nome, e definir as principais propriedades
+            DataGridViewButtonColumn fechar = new DataGridViewButtonColumn();
+            fechar.Name = "fecharConta";
+            fechar.HeaderText = "Fechar Conta";
+            fechar.Text = "Fechar Conta";
+            fechar.UseColumnTextForButtonValue = true;
+            int columIndex = 4;
+            dgvPri_pedido.Columns.Insert(columIndex, fechar);
+            Conexao.fecharConexao();
+            //Chama o evento
+            dgvPri_pedido.CellClick += dgvPri_pedido_CellClick;
+            int colunas = dgvPri_pedido.Columns.Count;
+            if(colunas > 5)
+            {
+                dgvPri_pedido.Columns.Remove("fecharConta");
+            }
+        }
+
         private void sairToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Environment.Exit(0);
@@ -65,14 +97,31 @@ namespace LojaCL
             usu.Show();
         }
 
-        private void FrmPrincipal_Load(object sender, EventArgs e)
+        private void dgvPri_pedido_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-
+            try
+            {
+                if(e.ColumnIndex == dgvPri_pedido.Columns["fecharConta"].Index)
+                {
+                    if(Application.OpenForms["FrmVenda"] == null)
+                    {
+                        FrmVenda ven = new FrmVenda();
+                        ven.Show();
+                    }
+                }
+            }
+            catch { }
         }
 
-        private void ferramentasToolStripMenuItem_Click(object sender, EventArgs e)
+        private void FrmPrincipal_Load(object sender, EventArgs e)
         {
+            carrega_dgvPri_pedido();
+        }
 
+        private void cartãoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FrmCrudCartaoVenda car = new FrmCrudCartaoVenda();
+            car.Show();
         }
     }
 }
