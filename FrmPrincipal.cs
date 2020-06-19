@@ -110,7 +110,8 @@ namespace LojaCL
                 {
                     if(Application.OpenForms["FrmVenda"] == null)
                     {
-                        FrmVenda ven = new FrmVenda();
+                        string numero = dgvPripedi[1, e.RowIndex].Value.ToString();
+                        FrmVenda ven = new FrmVenda(numero);
                         ven.Show();
                     }
                 }
@@ -130,6 +131,36 @@ namespace LojaCL
         {
             FrmPedido ped = new FrmPedido();
             ped.Show();
+        }
+
+        private void clientesToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            FrmRelCliente relcli = new FrmRelCliente();
+            relcli.Show();
+        }
+
+        private void produtosToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            FrmRelProdutos relprod = new FrmRelProdutos();
+            relprod.Show();
+        }
+
+        private void usuarioToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FrmRelUsuario relusu = new FrmRelUsuario();
+            relusu.Show();
+        }
+
+        private void cartaoVendaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FrmRelCartao relcartao = new FrmRelCartao();
+            relcartao.Show();
+        }
+
+        private void vendaFinalizadaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FrmRelVendaFinalizada relvendafinalizada = new FrmRelVendaFinalizada();
+            relvendafinalizada.Show();
         }
     }
 }
